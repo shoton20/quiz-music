@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R&B Music Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a0000 25%, #000033 50%, #1a0000 75%, #000000 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(255, 0, 0, 0.4), 0 0 60px rgba(0, 100, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff0000, #0066ff, #ff0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            animation: neonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6), 0 0 20px rgba(0, 100, 255, 0.3);
+            display: block;
+            margin: 20px auto;
+            border: 2px solid rgba(0, 100, 255, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8), 0 0 30px rgba(0, 100, 255, 0.5);
+            background: linear-gradient(135deg, #ff3333 0%, #ff0000 100%);
+        }
+
+        .timer-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .timer {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(0, 100, 255, 0.5);
+        }
+
+        .question-number {
+            text-align: center;
+            font-size: 1.2em;
+            color: #0066ff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 100, 255, 0.8);
+        }
+
+        .guess-text {
+            text-align: center;
+            font-size: 1.8em;
+            color: #ff0000;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+            letter-spacing: 2px;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .option {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .option:hover {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: #0066ff;
+            transform: translateX(5px);
+            box-shadow: 0 0 20px rgba(0, 100, 255, 0.5), 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .option.correct {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+            animation: pulse 0.5s ease;
+        }
+
+        .option.wrong {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            animation: shake 0.5s ease;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        .feedback.correct {
+            color: #22c55e;
+        }
+
+        .feedback.wrong {
+            color: #ef4444;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 3em;
+            margin: 30px 0;
+            color: #ff0000;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.8), 0 0 50px rgba(0, 100, 255, 0.5);
+        }
+
+        .intro-text {
+            text-align: center;
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #d1d5db;
+            margin: 30px 0;
+        }
+
+        .wrong-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 4em;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 0, 0, 0.8);
+            z-index: 1000;
+            animation: wrongPopup 1.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes wrongPopup {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+        }
+
+        .perfect-score {
+            animation: perfectCelebration 2s ease-in-out;
+        }
+
+        @keyframes perfectCelebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ff0000;
+            position: absolute;
+            animation: confettiFall 3s linear;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .listening-mode {
+            text-align: center;
+            font-size: 1.5em;
+            color: #0066ff;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(0, 100, 255, 0.8);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .timer {
+                font-size: 2em;
+            }
+            .option {
+                padding: 15px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="startScreen" class="screen active">
+            <h1>🎵 R&B Music Quiz 🎵</h1>
+            <p class="intro-text">
+                Test your R&B knowledge! Listen to 10-second clips, then guess the artist from 4 options. 
+                You have 5 seconds to answer after listening. Ready?
+            </p>
+            <button class="btn" onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <div id="quizScreen" class="screen">
+            <div class="question-number" id="questionNumber"></div>
+            <div class="listening-mode" id="listeningMode"></div>
+            <div class="guess-text" id="guessText"></div>
+            <div class="timer-container">
+                <div class="timer" id="timer">10</div>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <div class="options" id="options"></div>
+        </div>
+
+        <div id="resultScreen" class="screen">
+            <h1>Quiz Complete!</h1>
+            <div class="score-display" id="finalScore"></div>
+            <button class="btn" onclick="restartQuiz()">Play Again</button>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const questions = [
+            {
+                audio: "like i want you.mp3.mp4",  // Giveon - Like I Want You
+                correct: "Giveon",
+                options: ["Daniel Caesar", "Mac Miller", "Brent Faiyaz", "Giveon"]
+            },
+            {
+                audio: "wy@.mp3.mp4",  // Brent Faiyaz - WY@
+                correct: "Brent Faiyaz",
+                options: ["H.E.R.", "SZA", "Summer Walker", "Brent Faiyaz"]
+            },
+            {
+                audio: "wus-good.mp3.mp4",  // PARTYNEXTDOOR - Wus Good/Curious
+                correct: "PARTYNEXTDOOR",
+                options: ["The Weeknd", "PARTYNEXTDOOR", "Miguel", "Bryson Tiller"]
+            },
+            {
+                audio: "sweet life.mp3.mp4",  // Add your 4th song here
+                correct: "Frank Ocean",
+                options: ["PARTYNEXTDOOR", "Bryson Tiller", "Tory Lanez", "Frank Ocean"]
+            },
+            {
+                audio: "nobodybutyou.mp3.mp4",  // Add your 5th song here
+                correct: "Sonder",
+                options: ["The Weeknd", "Frank Ocean", "Sonder", "Usher"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 10;
+        let audioPlayer = document.getElementById('audioPlayer');
+        let isListeningPhase = true;
+
+        function playCorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function playWrongSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 200;
+            oscillator.type = 'sawtooth';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            showScreen('quizScreen');
+            loadQuestion();
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            timeLeft = 10;
+            isListeningPhase = true;
+            
+            document.getElementById('questionNumber').textContent = 
+                `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('listeningMode').textContent = '🎵 Listen carefully...';
+            document.getElementById('guessText').textContent = '';
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            optionsContainer.style.display = 'none';
+
+            audioPlayer.src = question.audio;
+            audioPlayer.play().catch(e => console.log('Audio play failed:', e));
+            
+            startListeningTimer();
+        }
+
+        function startListeningTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    audioPlayer.pause();
+                    startAnsweringPhase();
+                }
+            }, 1000);
+        }
+
+        function startAnsweringPhase() {
+            isListeningPhase = false;
+            timeLeft = 5;
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('listeningMode').textContent = '';
+            document.getElementById('guessText').textContent = '🎤 Guess the artist!';
+            
+            const question = questions[currentQuestion];
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.style.display = 'grid';
+            
+            question.options.forEach(option => {
+                const button = document.createElement('div');
+                button.className = 'option';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+
+            startAnswerTimer();
+        }
+
+        function startAnswerTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    selectAnswer(null);
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedOption) {
+            clearInterval(timer);
+            audioPlayer.pause();
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach(option => {
+                option.classList.add('disabled');
+                
+                if (option.textContent === question.correct) {
+                    option.classList.add('correct');
+                }
+                
+                if (option.textContent === selectedOption && selectedOption !== question.correct) {
+                    option.classList.add('wrong');
+                }
+            });
+
+            if (selectedOption === question.correct) {
+                score++;
+                feedback.textContent = '✓ Correct!';
+                feedback.className = 'feedback correct';
+                playCorrectSound();
+            } else {
+                feedback.textContent = selectedOption ? `✗ Wrong! It was ${question.correct}` : `⏱ Time's up! It was ${question.correct}`;
+                feedback.className = 'feedback wrong';
+                playWrongSound();
+                showWrongPopup();
+            }
+
+            setTimeout(() => {
+                currentQuestion++;
+                loadQuestion();
+            }, 2500);
+        }
+
+        function showWrongPopup() {
+            const popup = document.createElement('div');
+            popup.className = 'wrong-popup';
+            popup.textContent = 'Wrong 😢😢😢😢';
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.remove();
+            }, 1500);
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = ['#ff0000', '#0066ff', '#ffffff'][Math.floor(Math.random() * 3)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        function showResults() {
+            showScreen('resultScreen');
+            const percentage = Math.round((score / questions.length) * 100);
+            const scoreElement = document.getElementById('finalScore');
+            
+            if (score === questions.length) {
+                scoreElement.innerHTML = `🎉 PERFECT SCORE! 🎉<br>${score} / ${questions.length}`;
+                scoreElement.classList.add('perfect-score');
+                createConfetti();
+            } else {
+                scoreElement.textContent = `${score} / ${questions.length} (${percentage}%)`;
+            }
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+    </script>
+
+</body>
+</html>
